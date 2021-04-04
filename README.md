@@ -26,7 +26,7 @@
   # To install Python-Sat
   $ pip install python-sat
 
-  # To install pyteste(if neccessary)
+  # To install pytest(if neccessary)
   $ pip install pytest
 ```
 
