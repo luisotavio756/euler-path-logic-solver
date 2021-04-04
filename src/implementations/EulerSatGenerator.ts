@@ -1,7 +1,7 @@
 import { Options, PythonShell } from "python-shell";
 
-interface IDict {
-    [key: string]: string[]
+interface IObject {
+  [key: string]: string[]
 };
 
 class EulerSatGenerator {
@@ -39,16 +39,16 @@ class EulerSatGenerator {
 
     this.predicates = predicates;
 
-    // let i = 0;
+    let i = 0;
 
-    // for (let predicate in this.predicates) {
-    //   console.log(`${i+1} = ${this.predicates[predicate]}\t`);
+    for (let predicate in this.predicates) {
+      console.log(`${i+1} = ${this.predicates[predicate]}\t`);
 
-    //   if ((i+1) % this.steps === 0) {
-    //     console.log('\n')
-    //   }
-    //   i++;
-    // }
+      if ((i+1) % this.steps === 0) {
+        console.log('\n')
+      }
+      i++;
+    }
 
     return predicates;
   }
@@ -57,10 +57,10 @@ class EulerSatGenerator {
 
     const _formulas: [string, string][] = [] as any;
 
-    this.predicates.forEach((actual) => {
-      this.predicates.forEach((other) => {
-        if(actual !== other && actual[0] === other[0]) {
-          const formulaToAppend: [string, string] = [`¬${actual}`,`¬${other}`];
+    this.predicates.forEach((p1) => {
+      this.predicates.forEach((p2) => {
+        if(p1 !== p2 && p1[0] === p2[0]) {
+          const formulaToAppend: [string, string] = [`¬${p1}`,`¬${p2}`];
 
           _formulas.push(formulaToAppend);
         }
@@ -75,11 +75,11 @@ class EulerSatGenerator {
   public generateTipThree(): string[][] {
     const _formulas: [string, string][] = [] as any;
 
-    this.predicates.forEach((actual, i) => {
-      this.predicates.forEach((other) => {
-        if(actual !== other) {
-          if(actual.substring(2) === other.substring(2)) {
-            const formulaToAppend: [string, string] = [`¬${actual}`,`¬${other}`];
+    this.predicates.forEach((p1, i) => {
+      this.predicates.forEach((p2) => {
+        if(p1 !== p2) {
+          if(p1.substring(2) === p2.substring(2)) {
+            const formulaToAppend: [string, string] = [`¬${p1}`,`¬${p2}`];
 
             _formulas.push(formulaToAppend);
           }
@@ -95,17 +95,17 @@ class EulerSatGenerator {
   public generateFormulasBacking(): string[][] {
     const _formulas: [string, string][] = [] as any;
 
-    this.predicates.forEach((actual, i) => {
-      this.predicates.forEach((other) => {
-        if(actual !== other) {
-          const toCompareString = other.substring(2);
+    this.predicates.forEach((p1, i) => {
+      this.predicates.forEach((p2) => {
+        if(p1 !== p2) {
+          const toCompareString = p2.substring(2);
           const invertedString = toCompareString
             .split('')
             .map((char, i) => toCompareString[toCompareString.length - (i + 1)])
             .join('');
 
-          if(actual.substring(2) === invertedString) {
-            const formulaToAppend: [string, string] = [`¬${actual}`,`¬${other}`];
+          if(p1.substring(2) === invertedString) {
+            const formulaToAppend: [string, string] = [`¬${p1}`,`¬${p2}`];
 
             _formulas.push(formulaToAppend);
           }
@@ -121,23 +121,23 @@ class EulerSatGenerator {
   public generateFormulasNext(): string[] {
     const _formulas = [] as any;
 
-    this.predicates.forEach((actual) => {
-      let aux: string[] = [`¬${actual}`];
+    this.predicates.forEach((p1) => {
+      let aux: string[] = [`¬${p1}`];
 
-      this.predicates.forEach((other) => {
-        if(actual !== other) {
-          const actualIndex = parseInt(actual[0], 10);
-          const otherIndex = parseInt(other[0], 10);
+      this.predicates.forEach((p2) => {
+        if(p1 !== p2) {
+          const p1Index = parseInt(p1[0], 10);
+          const p2Index = parseInt(p2[0], 10);
 
-          const actualLastChar = actual[actual.length - 1];
-          const otherSecondLastChar = other[other.length - 2];
+          const p1LastChar = p1[p1.length - 1];
+          const p2SecondLastChar = p2[p2.length - 2];
 
           if(
-            ((actualIndex + 1) === otherIndex) &&
-            (actualLastChar === otherSecondLastChar) &&
-            actual[2] !== other[3]
+            ((p1Index + 1) === p2Index) &&
+            (p1LastChar === p2SecondLastChar) &&
+            p1[2] !== p2[3]
           ) {
-            aux.push(other);
+            aux.push(p2);
           }
         }
       })
@@ -152,8 +152,8 @@ class EulerSatGenerator {
     return _formulas;
   }
 
-  public generateDictionary(): IDict {
-    const dictionary: IDict = {};
+  public generateFormulasPositives(): IObject {
+    const _formulas: IObject = {};
 
     this.predicates.forEach((predicado) => {
       const edge = predicado.substring(2);
@@ -162,20 +162,20 @@ class EulerSatGenerator {
         .map((_, i) => edge[edge.length - (i + 1)])
         .join('');
 
-      if (dictionary[edge]) {
-        dictionary[edge].push(predicado);
-      } else if (dictionary[invertedEdge]) {
-        dictionary[invertedEdge].push(predicado);
+      if (_formulas[edge]) {
+        _formulas[edge].push(predicado);
+      } else if (_formulas[invertedEdge]) {
+        _formulas[invertedEdge].push(predicado);
       } else {
-        dictionary[edge] = [predicado];
+        _formulas[edge] = [predicado];
       }
     });
 
-    Object.keys(dictionary).forEach((item) => {
-      this.formulas.push(dictionary[item]);
+    Object.keys(_formulas).forEach((item) => {
+      this.formulas.push(_formulas[item]);
     });
 
-    return dictionary;
+    return _formulas;
   }
 
   public getSatFormat() {
@@ -204,7 +204,7 @@ class EulerSatGenerator {
       this.generateTipThree();
       this.generateFormulasBacking();
       this.generateFormulasNext();
-      this.generateDictionary();
+      this.generateFormulasPositives();
 
       const satFormat = this.getSatFormat();
       const parsedData = satFormat.join('\n');
