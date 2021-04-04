@@ -98,6 +98,7 @@ class EulerSatGenerator {
     this.predicates.forEach((p1, i) => {
       this.predicates.forEach((p2) => {
         if(p1 !== p2) {
+
           const toCompareString = p2.substring(2);
           const invertedString = toCompareString
             .split('')
@@ -122,7 +123,7 @@ class EulerSatGenerator {
     const _formulas = [] as any;
 
     this.predicates.forEach((p1) => {
-      let aux: string[] = [`¬${p1}`];
+      let array: string[] = [`¬${p1}`];
 
       this.predicates.forEach((p2) => {
         if(p1 !== p2) {
@@ -137,13 +138,13 @@ class EulerSatGenerator {
             (p1LastChar === p2SecondLastChar) &&
             p1[2] !== p2[3]
           ) {
-            aux.push(p2);
+            array.push(p2);
           }
         }
       })
 
-      if (aux.length > 1) {
-        _formulas.push(aux);
+      if (array.length > 1) {
+        _formulas.push(array);
       }
     });
 
