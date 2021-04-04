@@ -19,6 +19,10 @@ class EulerSatGenerator {
     return this.formulas;
   }
 
+  public getPredicates(): string[] {
+    return this.predicates;
+  }
+
   public generatePredicates() {
     let predicates: string[] = [];
 
@@ -33,16 +37,16 @@ class EulerSatGenerator {
 
     this.predicates = predicates;
 
-    let i = 0;
+    // let i = 0;
 
-    for (let predicate in this.predicates) {
-      console.log(`${i+1} = ${this.predicates[predicate]}\t`);
+    // for (let predicate in this.predicates) {
+    //   console.log(`${i+1} = ${this.predicates[predicate]}\t`);
 
-      if ((i+1) % this.steps === 0) {
-        console.log('\n')
-      }
-      i++;
-    }
+    //   if ((i+1) % this.steps === 0) {
+    //     console.log('\n')
+    //   }
+    //   i++;
+    // }
 
     return predicates;
   }
