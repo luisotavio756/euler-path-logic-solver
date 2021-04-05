@@ -4,25 +4,22 @@ from pysat.formula import CNF
 from pysat.solvers import Solver
 
 try:
-  formulas_glucose = sys.argv[1].split('\n')
+  clauses = sys.argv[1].split('\n')
 except:
   print('ERROR')
   sys.exit(1)
 
-g = Glucose4()
-formula = CNF()
+glucoseInstance = Glucose4()
+formulaInFncFormat = CNF()
 
-for f in formulas_glucose:
-  formula.append(eval(f))
+for f in clauses:
+  formulaInFncFormat.append(eval(f))
 
-g.append_formula(formula)
+glucoseInstance.append_formula(formulaInFncFormat)
 
-print(g.solve())
+print(glucoseInstance.solve())
+print(glucoseInstance.nof_clauses())
 
-print(g.solve())
-print(g.get_status())
-print(g.nof_clauses())
-print(g.nof_vars())
-for p in g.get_model():
+for p in glucoseInstance.get_model():
   if p > 0:
     print(p)
