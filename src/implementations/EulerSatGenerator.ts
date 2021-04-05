@@ -130,12 +130,14 @@ class EulerSatGenerator {
           const p1Index = parseInt(p1[0], 10);
           const p2Index = parseInt(p2[0], 10);
 
+          // 1_AB
+          // 2_BC
           const p1LastChar = p1[p1.length - 1];
           const p2SecondLastChar = p2[p2.length - 2];
 
           if(
-            ((p1Index + 1) === p2Index) &&
-            (p1LastChar === p2SecondLastChar) &&
+            ((p1Index + 1) === p2Index) && // 1 + 1 === 2
+            (p1LastChar === p2SecondLastChar) && //
             p1[2] !== p2[3]
           ) {
             array.push(p2);
@@ -156,19 +158,19 @@ class EulerSatGenerator {
   public generateFormulasPositives(): IObject {
     const _formulas: IObject = {};
 
-    this.predicates.forEach((predicado) => {
-      const edge = predicado.substring(2);
+    this.predicates.forEach((predicate) => {
+      const edge = predicate.substring(2);
       const invertedEdge = edge
         .split('')
         .map((_, i) => edge[edge.length - (i + 1)])
         .join('');
 
       if (_formulas[edge]) {
-        _formulas[edge].push(predicado);
+        _formulas[edge].push(predicate);
       } else if (_formulas[invertedEdge]) {
-        _formulas[invertedEdge].push(predicado);
+        _formulas[invertedEdge].push(predicate);
       } else {
-        _formulas[edge] = [predicado];
+        _formulas[edge] = [predicate];
       }
     });
 
@@ -179,21 +181,22 @@ class EulerSatGenerator {
     return _formulas;
   }
 
+
   public getSatFormat() {
     const _formulas: number[][] = [];
 
     this.formulas.forEach((formula) => {
-      const formulaGlucose: number[] = [];
+      const formulasInSatFormat: number[] = [];
 
       formula.forEach((predicate: string) => {
         if (this.predicates.indexOf(predicate) > -1) {
-          formulaGlucose.push(this.predicates.indexOf(predicate) + 1);
+          formulasInSatFormat.push(this.predicates.indexOf(predicate) + 1);
         } else if ('¬' === predicate[0]) {
-          formulaGlucose.push((this.predicates.indexOf(predicate.substring(1)) + 1) * -1);
+          formulasInSatFormat.push((this.predicates.indexOf(predicate.substring(1)) + 1) * -1);
         }
       });
 
-      _formulas.push(formulaGlucose);
+      _formulas.push(formulasInSatFormat);
     });
 
     return _formulas;
@@ -214,22 +217,28 @@ class EulerSatGenerator {
       let options: Options = {
         mode: 'text',
         pythonOptions: ['-u'],
-        args: [parsedData, ],
+        args: [parsedData],
       };
 
       PythonShell.run('./src/python.py', options, function (err, results: any[] | undefined) {
-        if (err) throw err;
-          if(results && results[0]) {
-            console.log('Valid: True');
-            console.log(`Clauses: ${results[3]}`);
-            console.log(`Vars: ${results[4]}\n`);
+        if (err) {
+          throw err
+        };
 
-            for(let i = 5; i < results.length; i++) {
-              const parsedResult = parseInt(results[i]);
+        if(results && results[0] === 'True') {
+          console.log('Valid: True');
+          console.log(`Clauses: ${results[1]}\n`);
+          console.log('Eulerian Path:');
+          console.log('--------------\n');
 
-              console.log(`${parsedResult} = ${predicates[parsedResult]}\n`);
-            }
+          for(let i = 2; i < results.length; i++) {
+            const parsedResult = parseInt(results[i]);
+
+            console.log(`${parsedResult} = ${predicates[parsedResult]}\n`);
           }
+
+          console.log('--------------');
+        }
       });
   }
 }
