@@ -203,43 +203,43 @@ class EulerSatGenerator {
   }
 
   public solve() {
-      this.generatePredicates();
-      this.generateTipTwo();
-      this.generateTipThree();
-      this.generateFormulasBacking();
-      this.generateFormulasNext();
-      this.generateFormulasPositives();
+    this.generatePredicates();
+    this.generateTipTwo();
+    this.generateTipThree();
+    this.generateFormulasBacking();
+    this.generateFormulasNext();
+    this.generateFormulasPositives();
 
-      const satFormat = this.getSatFormat();
-      const parsedData = satFormat.join('\n');
-      const predicates = this.getPredicates();
+    const satFormat = this.getSatFormat();
+    const parsedData = satFormat.join('\n');
+    const predicates = this.getPredicates();
 
-      let options: Options = {
-        mode: 'text',
-        pythonOptions: ['-u'],
-        args: [parsedData],
+    let options: Options = {
+      mode: 'text',
+      pythonOptions: ['-u'],
+      args: [parsedData],
+    };
+
+    PythonShell.run('./src/python.py', options, function (err, results: any[] | undefined) {
+      if (err) {
+        throw err
       };
 
-      PythonShell.run('./src/python.py', options, function (err, results: any[] | undefined) {
-        if (err) {
-          throw err
-        };
+      if(results && results[0] === 'True') {
+        console.log('Valid: True');
+        console.log(`Clauses: ${results[1]}\n`);
+        console.log('Eulerian Path:');
+        console.log('--------------\n');
 
-        if(results && results[0] === 'True') {
-          console.log('Valid: True');
-          console.log(`Clauses: ${results[1]}\n`);
-          console.log('Eulerian Path:');
-          console.log('--------------\n');
+        for(let i = 2; i < results.length; i++) {
+          const parsedResult = parseInt(results[i]);
 
-          for(let i = 2; i < results.length; i++) {
-            const parsedResult = parseInt(results[i]);
-
-            console.log(`${parsedResult} = ${predicates[parsedResult]}\n`);
-          }
-
-          console.log('--------------');
+          console.log(`${parsedResult} = ${predicates[parsedResult]}\n`);
         }
-      });
+
+        console.log('--------------');
+      }
+    });
   }
 }
 
